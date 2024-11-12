@@ -1,0 +1,307 @@
+{% load static %}
+
+<html>
+
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeFlow - Level Up Your Coding Journey</title>
+
+    <link rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen" x-data="{ showMenu: false }">
+    <div id="particles-js"></div>
+
+    <div class="content">
+        <!-- Navigation -->
+        <nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                        </svg>
+                        <a href="/"><span class="ml-2 text-xl font-bold">CodeFlow</span></a>
+                    </div>
+
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex space-x-6 lg:space-x-8">
+                        <a href="{% url 'courses' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                            <i class="fas fa-question-circle text-lg"></i>
+                            <span>Courses</span>
+                        </a>
+                        <a href="{% url 'leaderboard' %}"
+                            class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                            <i class="fas fa-trophy text-lg"></i>
+                            <span>Leaderboard</span>
+                        </a>
+                        <a href="{% url 'resources' %}"
+                            class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                            <i class="fas fa-book text-lg"></i>
+                            <span>Resources</span>
+                        </a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="nav-item flex content-end items-center space-x-2 hover:text-blue-400"><i class="fas fa-right-from-bracket text-lg"></i>
+                            <span>Logout</span></a>
+                        {% else %}
+                        <a href="{% url 'login' %}"
+                            class="nav-item flex content-end items-center space-x-2 hover:text-blue-400">
+                            <i class="fas fa-user text-lg"></i>
+                            <span>Login</span>
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Mobile menu button -->
+                    <button @click="showMenu = !showMenu" class="md:hidden text-gray-300 hover:text-white p-2">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+
+                <!-- Mobile menu -->
+                <div x-show="showMenu" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                    x-transition:leave="transition ease-in duration-150"
+                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                    x-transition:leave-end="opacity-0 transform -translate-y-2" class="md:hidden">
+                    <div class="px-2 pt-2 pb-3 space-y-1">
+                        <a href="{% url 'courses' %}"
+                            class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                            <i class="fas fa-question-circle mr-2"></i>Courses
+                        </a>
+                        <a href="{% url 'leaderboard' %}"
+                            class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                            <i class="fas fa-trophy mr-2"></i>Leaderboard
+                        </a>
+                        <a href="{% url 'resources' %}"
+                            class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                            <i class="fas fa-book mr-2"></i>Resources
+                        </a>
+                        <a href="{% url 'login' %}"
+                            class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                            <i class="fas fa-book mr-2"></i>Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
+                <div class="lg:w-1/2 text-center lg:text-left">
+                    {% if user.is_authenticated %}
+                    <h1 class="text-4xl sm:text-5xl font-bold mb-6 gradient-text leading-tight">Welcome, {{ username }}
+                    </h1>
+                    {% else %}
+                    <h1 class="text-4xl sm:text-5xl font-bold mb-6 gradient-text leading-tight">Master Your Code Journey
+                    </h1>
+                    {% endif %}
+                    <p class="text-lg sm:text-xl text-gray-300 mb-8">Join an elite community of developers. Practice
+                        daily, compete in challenges, and climb the ranks while building your coding expertise.</p>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="{% url 'courses' %}"
+                            class="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition glow inline-flex items-center justify-center">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Get Started
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                        <a href="{% url "login" %}"
+                            class="px-8 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 transition glow inline-flex items-center justify-center">
+                            <i class="fas fa-rocket mr-2"></i>
+                            Get Started
+                        </a>
+                        <a href="https://codeflow.io/tour"
+                            class="px-8 py-3 rounded-lg border border-blue-400 hover:bg-blue-900/50 transition inline-flex items-center justify-center">
+                            <i class="fas fa-play mr-2"></i>
+                            Take a Tour
+                        </a>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="lg:w-1/2 w-full floating-code">
+                    <div class="bg-slate-800 rounded-lg p-4 sm:p-6 shadow-xl">
+                        <div class="flex items-center mb-3">
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                        </div>
+                        <pre class="text-sm sm:text-base text-green-400 overflow-x-auto">
+<code>function challengeAccepted() {
+    const developer = {
+        mindset: 'growth',
+        goals: ['learn', 'practice', 'improve'],
+        dailyRoutine: ['solve-challenges', 'review-code', 'collaborate']
+    };
+    
+    while(developer.mindset === 'growth') {
+        developer.skills++;
+        developer.rank++;
+    }
+    
+    return '🚀 Level Up Complete!';
+}</code>
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Features Section -->
+        <section class="bg-slate-800/50 py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 gradient-text">Why CodeFlow?</h2>
+
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                    <div
+                        class="p-6 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition transform hover:-translate-y-1 duration-200">
+                        <i class="fas fa-code text-3xl sm:text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Daily Challenges</h3>
+                        <p class="text-gray-300">Tackle new coding problems daily across multiple difficulty levels.</p>
+                    </div>
+
+                    <div
+                        class="p-6 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition transform hover:-translate-y-1 duration-200">
+                        <i class="fas fa-chart-line text-3xl sm:text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Track Progress</h3>
+                        <p class="text-gray-300">Monitor your growth with detailed performance analytics.</p>
+                    </div>
+
+                    <div
+                        class="p-6 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition transform hover:-translate-y-1 duration-200">
+                        <i class="fas fa-users text-3xl sm:text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Community</h3>
+                        <p class="text-gray-300">Learn and grow with fellow coding enthusiasts.</p>
+                    </div>
+
+                    <div
+                        class="p-6 rounded-lg bg-slate-700/50 hover:bg-slate-700 transition transform hover:-translate-y-1 duration-200">
+                        <i class="fas fa-trophy text-3xl sm:text-4xl text-blue-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2">Rankings</h3>
+                        <p class="text-gray-300">Compete and earn your place on the leaderboard.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section class="py-16 bg-slate-900/80">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                    <div class="p-6">
+                        <div class="text-4xl font-bold text-blue-400 mb-2">50K+</div>
+                        <div class="text-gray-300">Active Members</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-4xl font-bold text-blue-400 mb-2">1000+</div>
+                        <div class="text-gray-300">Coding Challenges</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-4xl font-bold text-blue-400 mb-2">200+</div>
+                        <div class="text-gray-300">Daily Quizzes</div>
+                    </div>
+                    <div class="p-6">
+                        <div class="text-4xl font-bold text-blue-400 mb-2">98%</div>
+                        <div class="text-gray-300">Success Rate</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="py-16 bg-slate-800/50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 gradient-text">What Our Members Say</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-slate-700/50 p-6 rounded-lg">
+                        <div class="text-blue-400 mb-4"><i class="fas fa-quote-left text-2xl"></i></div>
+                        <p class="text-gray-300 mb-4">"CodeFlow has transformed my coding journey. The daily challenges
+                            keep me motivated and the community support is incredible."</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="font-semibold">Sarah Chen</div>
+                                <div class="text-sm text-gray-400">Full Stack Developer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-700/50 p-6 rounded-lg">
+                        <div class="text-blue-400 mb-4"><i class="fas fa-quote-left text-2xl"></i></div>
+                        <p class="text-gray-300 mb-4">"The competitive aspects and leaderboard system really push me to
+                            improve. I've learned more here than in my CS classes."</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="font-semibold">Marcus Johnson</div>
+                                <div class="text-sm text-gray-400">Student Developer</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-700/50 p-6 rounded-lg">
+                        <div class="text-blue-400 mb-4"><i class="fas fa-quote-left text-2xl"></i></div>
+                        <p class="text-gray-300 mb-4">"The variety of challenges and resources available here is
+                            amazing. It's become an essential part of my daily coding practice."</p>
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="font-semibold">Emma Wilson</div>
+                                <div class="text-sm text-gray-400">Software Engineer</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section class="py-16 bg-slate-900/80">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 class="text-3xl font-bold mb-6 gradient-text">Ready to Level Up Your Coding Skills?</h2>
+                <p class="text-gray-300 mb-8 max-w-2xl mx-auto text-lg">Join thousands of developers who are already
+                    improving their skills and climbing the ranks on CodeFlow.</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'courses' %}"
+                class="px-8 py-4 rounded-lg bg-blue-600 hover:bg-blue-700 transition glow inline-flex items-center justify-center text-lg">
+                <i class="fas fa-rocket mr-2"></i>
+                Start Your Journey Today
+            </a>
+                {% else %}
+                <a href="{% url 'login' %}"
+                class="px-8 py-4 rounded-lg bg-blue-600 hover:bg-blue-700 transition glow inline-flex items-center justify-center text-lg">
+                <i class="fas fa-rocket mr-2"></i>
+                Start Your Journey Today
+            </a>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,372 @@
+{% load static %}
+
+<html>
+
+<head>
+    <base href="/">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeFlow - Learning Paths</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-text {
+            background: linear-gradient(45deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .quiz-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-stats {
+            display: flex;
+            gap: 1rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            width: 100%;
+            color: white;
+        }
+
+        .search-bar::placeholder {
+            color: #94a3b8;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .quiz-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(147, 51, 234, 0.1));
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 0;
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+            stroke-linecap: round;
+        }
+
+        .progress-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            padding: 3px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.3s;
+        }
+
+        .progress-text {
+            position: absolute;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white !important;
+        }
+
+        /* Add to existing styles */
+        .mobile-menu-btn {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-menu-items {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #1e293b;
+                padding: 1rem;
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            }
+
+            .nav-menu-items.show {
+                display: block;
+            }
+
+            .nav-menu-items a {
+                display: block;
+                padding: 0.75rem 1rem;
+            }
+
+            .filters {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .filter-btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .search-bar {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .quiz-card {
+                margin-bottom: 1rem;
+            }
+
+            .quiz-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .quiz-image {
+                height: 140px;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen" x-data="{ showMenu: false }">
+    <!-- Navigation -->
+    <nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    </svg>
+                    <a href="/"><span class="ml-2 text-xl font-bold">CodeFlow</span></a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex space-x-6 lg:space-x-8">
+                    <a href="{% url 'courses' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                        <i class="fas fa-question-circle text-lg"></i>
+                        <span>Courses</span>
+                    </a>
+                    <a href="{% url 'leaderboard' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                        <i class="fas fa-trophy text-lg"></i>
+                        <span>Leaderboard</span>
+                    </a>
+                    <a href="{% url 'resources' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                        <i class="fas fa-book text-lg"></i>
+                        <span>Resources</span>
+                    </a>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="nav-item flex content-end items-center space-x-2 hover:text-blue-400"><i
+                            class="fas fa-right-from-bracket text-lg"></i>
+                        <span>Logout</span></a>
+                    {% else %}
+                    <a href="{% url 'login' %}"
+                        class="nav-item flex content-end items-center space-x-2 hover:text-blue-400">
+                        <i class="fas fa-user text-lg"></i>
+                        <span>Login</span>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Mobile menu button -->
+                <button @click="showMenu = !showMenu" class="md:hidden text-gray-300 hover:text-white p-2">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Mobile menu -->
+            <div x-show="showMenu" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 transform -translate-y-2"
+                x-transition:enter-end="opacity-100 transform translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 transform translate-y-0"
+                x-transition:leave-end="opacity-0 transform -translate-y-2" class="md:hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1">
+                    <a href="{% url 'courses' %}"
+                        class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                        <i class="fas fa-question-circle mr-2"></i>Courses
+                    </a>
+                    <a href="{% url 'leaderboard' %}"
+                        class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                        <i class="fas fa-trophy mr-2"></i>Leaderboard
+                    </a>
+                    <a href="{% url 'resources' %}"
+                        class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                        <i class="fas fa-book mr-2"></i>Resources
+                    </a>
+                    <a href="{% url 'login' %}"
+                        class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                        <i class="fas fa-book mr-2"></i>Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- Main Content -->
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <div class="mb-12">
+                <div class="mb-12">
+                    <div class="flex flex-col gap-6 mb-8">
+                        <input type="search" placeholder="Search learning paths..." class="search-bar">
+                        <div class="filters">
+                            <button class="filter-btn active">All</button>
+                            <button class="filter-btn">Beginner</button>
+                            <button class="filter-btn">Intermediate</button>
+                            <button class="filter-btn">Advanced</button>
+                            <button class="filter-btn">Python</button>
+                            <button class="filter-btn">JavaScript</button>
+                            <button class="filter-btn">Web Dev</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <h1 class="text-4xl font-bold mb-4 gradient-text">Learning Paths</h1>
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto">Master programming through structured learning paths and
+                interactive quizzes</p>
+        </div>
+
+        <!-- Learning Paths Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for course in courses %}
+
+            <div class="quiz-card">
+                <div
+                    class="quiz-image bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center relative">
+                    <i class="{{ course.icon_class }} text-6xl text-blue-400"></i>
+                    <div class="progress-indicator">
+                        <svg class="w-full h-full" viewBox="0 0 36 36">
+                            <path d="M18 2.0845
+        a 15.9155 15.9155 0 0 1 0 31.831
+        a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5" />
+                            <path d="M18 2.0845
+        a 15.9155 15.9155 0 0 1 0 31.831
+        a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"
+                                stroke-dasharray="60, 100" />
+                            <text x="18" y="20.35" class="progress-text text-white" text-anchor="middle">60%</text>
+                        </svg>
+
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <!-- <span class="category-badge"></span> -->
+                        <div class="quiz-stats">
+                            <span><i class="fas fa-clock mr-2"></i>{{ course.duration }}</span>
+                            <span><i class="fas fa-graduation-cap mr-2"></i>{{ course_modules.total_modules }} modules</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">{{ course.title }}</h3>
+                    <p class="text-gray-400 mb-4">{{ course.description }}
+                    </p>
+                    <a href="{% url 'course_detail' course_slug=course.slug %}" class="start-btn w-full">Continue Learning</a>
+                </div>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </main>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            // Add any additional Alpine.js initialization if needed
+        });
+
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            document.querySelector('.nav-menu-items').classList.toggle('show');
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,647 @@
+{% load static %}
+
+
+<html><head><base href="https://codeflow.io/courses/python-intro/lesson4">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditional Statements - Python Introduction | CodeFlow</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
+
+<style>
+.code-editor {
+    background: #1e1e1e;
+    border-radius: 0.5rem;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.quiz-question {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bg-slate-800\/50 {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+#quiz-progress {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    transition: width 0.5s ease-out;
+}
+
+pre code {
+    border-radius: 8px;
+    padding: 1.5rem !important;
+    margin: 1.5rem 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+input[type="text"] {
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.quiz-results .result-item {
+    transition: all 0.3s ease;
+}
+
+.quiz-results .result-item:hover {
+    transform: translateX(8px);
+}
+
+.output-terminal {
+    background: #2d2d2d;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+.lesson-navigation button {
+    transition: all 0.2s ease;
+}
+
+.lesson-navigation button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.interactive-exercise {
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    transition: all 0.3s ease;
+}
+
+.interactive-exercise:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.1);
+}
+
+@media (max-width: 768px) {
+    .lesson-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.radio-circle::after {
+    content: '';
+    width: 12px;
+    height: 12px;
+    background: #3b82f6;
+    border-radius: 50%;
+    display: none;
+}
+
+input[type="radio"]:checked + div .radio-circle::after {
+    display: block;
+}
+
+input[type="radio"]:checked + div {
+    color: #3b82f6;
+}
+
+.quiz-question label:hover .radio-circle {
+    border-color: #60a5fa;
+}
+
+.answer-feedback {
+    display: none;
+    margin-left: 2rem;
+    padding-left: 1rem;
+    border-left: 3px solid;
+}
+
+.answer-feedback.correct {
+    color: #22c55e;
+    border-color: #22c55e;
+}
+
+.answer-feedback.incorrect {
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.quiz-results .result-item {
+    border-left: 3px solid;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.quiz-results .correct {
+    border-color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+}
+
+.quiz-results .incorrect {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.cursor-not-allowed {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.cursor-not-allowed:hover {
+    background: rgba(51, 65, 85, 0.5) !important;
+}
+
+.timer-container {
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+#countdown-timer {
+    min-width: 60px;
+    text-align: right;
+}
+
+.timer-warning {
+    animation: pulse 1s infinite;
+    color: #f97316;
+    border-color: #f97316;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+</style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+
+<!-- Navigation -->
+<nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <a href="https://codeflow.io" class="flex items-center">
+                    <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                    </svg>
+                    <span class="ml-2 text-xl font-bold">CodeFlow</span>
+                </a>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4">
+                    <div class="px-4 py-2 bg-slate-700/50 rounded-lg border border-blue-500/20">
+                        <span class="font-bold text-blue-400">Score:</span>
+                        <span id="user-score" class="text-white">0</span>
+                    </div>
+                    <div class="px-4 py-2 bg-slate-700/50 rounded-lg border border-blue-500/20">
+                        <span class="font-bold text-blue-400">Level:</span>
+                        <span class="text-white">12</span>
+                    </div>
+                    <div class="px-4 py-2 bg-slate-700/50 rounded-lg border border-blue-500/20">
+                        <span class="font-bold text-blue-400">Rank:</span>
+                        <span class="text-white">#42</span>
+                    </div>
+                    <span class="timer-container px-4 py-2 bg-slate-700/50 rounded-lg border border-blue-500/20">
+                        <i class="fas fa-clock mr-2 text-blue-400"></i>
+                        <span id="countdown-timer" class="font-mono">00:00</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Lesson Header -->
+    <div class="mb-8">
+        <div class="flex items-center mb-4">
+            <span class="text-slate-400">Module 2:</span>
+            <span class="mx-2 text-slate-400">›</span>
+            <h1 class="text-2xl font-bold">Conditional Statements</h1>
+        </div>
+    </div>
+
+    <!-- Quiz UI -->
+    <div class="lg:col-span-2 space-y-8">
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-700 rounded-full h-4 mb-8">
+            <div class="bg-blue-500 h-4 rounded-full transition-all duration-500" style="width: 0%" id="quiz-progress"></div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div class="bg-slate-800/50 rounded-xl p-8">
+            <div id="quiz-container" class="space-y-8">
+                <div class="quiz-question" data-question="1">
+                    <h3 class="text-xl font-bold mb-4">Question 1 of 5</h3>
+                    <p class="text-lg mb-6">Which of the following is the correct way to write an if statement in Python?</p>
+                    
+                    <div class="space-y-4">
+                        <label class="block p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="a" class="hidden">
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 border-2 border-blue-500 rounded-full mr-4 flex items-center justify-center radio-circle"></span>
+                                <span>if (condition):</span>
+                                <span class="answer-feedback correct"> 
+                                    <i class="fas fa-check-circle mr-2"></i>Correct!</span>
+                                <span class="answer-feedback incorrect"> 
+                                    <i class="fas fa-times-circle mr-2"></i>Incorrect</span>
+                            </div>
+                        </label>
+                        
+                        <label class="block p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="b" class="hidden">
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 border-2 border-blue-500 rounded-full mr-4 flex items-center justify-center radio-circle"></span>
+                                <span>if condition {</span>
+                                <span class="answer-feedback correct"> 
+                                    <i class="fas fa-check-circle mr-2"></i>Correct!</span>
+                                <span class="answer-feedback incorrect"> 
+                                    <i class="fas fa-times-circle mr-2"></i>Incorrect</span>
+                            </div>
+                        </label>
+                        
+                        <label class="block p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 cursor-pointer transition-colors">
+                            <input type="radio" name="q1" value="c" class="hidden">
+                            <div class="flex items-center">
+                                <span class="w-6 h-6 border-2 border-blue-500 rounded-full mr-4 flex items-center justify-center radio-circle"></span>
+                                <span>if condition;</span>
+                                <span class="answer-feedback correct"> 
+                                    <i class="fas fa-check-circle mr-2"></i>Correct!</span>
+                                <span class="answer-feedback incorrect"> 
+                                    <i class="fas fa-times-circle mr-2"></i>Incorrect</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end items-center">
+                <button id="next-btn" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                    Next<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Sidebar -->
+<div class="lg:col-span-1">
+    <div class="sticky top-24 space-y-6">
+        <!-- Resources -->
+        <div class="bg-slate-800/50 rounded-xl p-6">
+            <h3 class="text-lg font-bold mb-4">Additional Resources</h3>
+            <ul class="space-y-2">
+                <li>
+                    <a href="https://docs.python.org/3/tutorial/controlflow.html" target="_blank" class="text-blue-400 hover:text-blue-300">
+                        <i class="fas fa-external-link-alt mr-2"></i>
+                        Python Documentation
+                    </a>
+                </li>
+                <li>
+                    <a href="https://realpython.com/python-conditional-statements/" target="_blank" class="text-blue-400 hover:text-blue-300">
+                        <i class="fas fa-external-link-alt mr-2"></i>
+                        Real Python Tutorial
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {
+        question: "Which of the following is the correct way to write an if statement in Python?",
+        options: [
+            "if (condition):",
+            "if condition {",
+            "if condition;"
+        ],
+        correct: 0,
+        type: "multiple-choice"
+    },
+    {
+        question: "What happens if the condition in an if statement is False?",
+        options: [
+            "The code block is executed anyway",
+            "The code block is skipped",
+            "Python returns an error"
+        ],
+        correct: 1,
+        type: "multiple-choice"
+    },
+    {
+        question: "Which keyword is used for alternative conditions in Python?",
+        options: [
+            "elif",
+            "else if",
+            "switch"
+        ],
+        correct: 0,
+        type: "multiple-choice"
+    },
+    {
+        question: "What is the purpose of the else statement?",
+        options: [
+            "To check additional conditions",
+            "To execute code when no conditions are true",
+            "To end the if statement"
+        ],
+        correct: 1,
+        type: "multiple-choice"
+    },
+    {
+        question: "What type of value must an if condition evaluate to?",
+        options: [
+            "String",
+            "Integer",
+            "Boolean"
+        ],
+        correct: 2,
+        type: "multiple-choice"
+    },
+    {
+        question: "What is the output of this code?",
+        code: `x = 5
+if x > 3:
+    print("Greater")
+else:
+    print("Lesser")`,
+        options: [
+            "Greater",
+            "Lesser",
+            "Nothing"
+        ],
+        correct: 0,
+        type: "multiple-choice"
+    },
+    {
+        question: "What condition should go in the if statement to make this code print 'Success'?",
+        code: `numbers = [1, 2, 3, 4, 5]
+if _____:
+    print("Success")`,
+        type: "text-input",
+        correct: "len(numbers) == 5",
+        acceptableAnswers: ["len(numbers) == 5", "len(numbers)==5", "len(numbers)>=5", "len(numbers) >= 5"]
+    }
+];
+
+let currentQuestion = 0;
+let userAnswers = new Array(questions.length).fill(null);
+let userScore = 0; 
+const progressBar = document.getElementById('quiz-progress');
+
+let timeLeft = 1800; // 30 minutes in seconds
+const timerElement = document.getElementById('countdown-timer');
+
+function updateTimer() {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    
+    timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    if (timeLeft <= 300) { // Last 5 minutes
+        timerElement.parentElement.classList.add('timer-warning');
+    }
+    
+    if (timeLeft > 0) {
+        timeLeft--;
+        setTimeout(updateTimer, 1000);
+    } else {
+        submitQuiz(); // Auto submit when time runs out
+    }
+}
+
+const nextBtn = document.getElementById('next-btn');
+const quizContainer = document.getElementById('quiz-container');
+
+function updateProgress() {
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
+    progressBar.style.width = `${progress}%`;
+}
+
+function updateButtons() {
+    const currentQ = questions[currentQuestion];
+    if (currentQ.type === 'multiple-choice' && userAnswers[currentQuestion] !== null) {
+        nextBtn.textContent = 'Submit Quiz';
+        nextBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+    } else {
+        nextBtn.textContent = 'Next';
+        nextBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+    }
+}
+
+function displayQuestion() {
+    const question = questions[currentQuestion];
+    let questionHTML = `
+        <div class="quiz-question" data-question="${currentQuestion + 1}">
+            <h3 class="text-xl font-bold mb-4">Question ${currentQuestion + 1} of ${questions.length}</h3>
+            <p class="text-lg mb-6">${question.question}</p>`;
+            
+    if (question.code) {
+        questionHTML += `
+            <pre class="mb-6"><code class="python">${question.code}</code></pre>`;
+    }
+    
+    if (question.type === "multiple-choice") {
+        questionHTML += `
+            <div class="space-y-4">
+                ${question.options.map((option, index) => `
+                    <label class="block p-4 rounded-lg bg-slate-700/50 hover:bg-slate-700 cursor-pointer transition-colors">
+                        <input type="radio" name="q${currentQuestion + 1}" value="${index}" 
+                            ${userAnswers[currentQuestion] === index ? 'checked' : ''} class="hidden">
+                        <div class="flex items-center">
+                            <span class="w-6 h-6 border-2 border-blue-500 rounded-full mr-4 flex items-center justify-center radio-circle"></span>
+                            <span>${option}</span>
+                            <span class="answer-feedback ${index === question.correct ? 'correct' : 'incorrect'}">
+                                ${index === question.correct ? 
+                                    '<i class="fas fa-check-circle mr-2"></i>Correct!' : 
+                                    '<i class="fas fa-times-circle mr-2"></i>Incorrect'}
+                            </span>
+                        </div>
+                    </label>
+                `).join('')}
+            </div>`;
+    } else if (question.type === "text-input") {
+        questionHTML += `
+            <div class="space-y-4">
+                <input type="text" class="w-full p-3 rounded-lg bg-slate-700/50 border border-slate-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    placeholder="Type your answer here">
+                <div class="answer-feedback hidden mt-4"></div>
+            </div>`;
+    }
+    
+    questionHTML += `</div>`;
+    quizContainer.innerHTML = questionHTML;
+
+    // Initialize syntax highlighting for code blocks
+    if (question.code) {
+        hljs.highlightAll();
+    }
+
+    // Add event listeners based on question type
+    if (question.type === "multiple-choice") {
+        const radioButtons = quizContainer.querySelectorAll('input[type="radio"]');
+        radioButtons.forEach(radio => {
+            radio.addEventListener('change', () => {
+                userAnswers[currentQuestion] = parseInt(radio.value);
+                
+                // Update score if correct
+                if (parseInt(radio.value) === questions[currentQuestion].correct) {
+                    userScore += 10;
+                    document.getElementById('user-score').textContent = userScore;
+                }
+                
+                // Disable all radio buttons after selection
+                radioButtons.forEach(r => r.disabled = true);
+                
+                // Show feedback for all options
+                const allLabels = quizContainer.querySelectorAll('label');
+                allLabels.forEach((label, index) => {
+                    label.classList.remove('hover:bg-slate-700');
+                    label.classList.add('cursor-not-allowed');
+                    
+                    // Show correct/incorrect feedback
+                    const feedback = label.querySelector('.answer-feedback');
+                    feedback.style.display = 'inline-block';
+                    
+                    // Highlight correct answer
+                    if (index === questions[currentQuestion].correct) {
+                        label.classList.add('ring-2', 'ring-green-500');
+                    }
+                    
+                    // If this was user's choice and it's wrong, highlight in red
+                    if (index === parseInt(radio.value) && index !== questions[currentQuestion].correct) {
+                        label.classList.add('ring-2', 'ring-red-500');
+                    }
+                });
+            });
+
+        });
+    } else if (question.type === "text-input") {
+        const input = quizContainer.querySelector('input[type="text"]'); 
+
+        input.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                const userAnswer = input.value.trim();
+                const feedback = quizContainer.querySelector('.answer-feedback');
+                const isCorrect = question.acceptableAnswers.includes(userAnswer);
+                
+                feedback.classList.remove('hidden');
+                if (isCorrect) {
+                    feedback.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-2"></i>Correct!';
+                    feedback.classList.add('text-green-500');
+                } else {
+                    feedback.innerHTML = `<i class="fas fa-times-circle text-red-500 mr-2"></i>Incorrect. The correct answer is: ${question.correct}`;
+                    feedback.classList.add('text-red-500');
+                }
+                
+                input.disabled = true;
+                userAnswers[currentQuestion] = userAnswer;
+            }
+        });
+    }
+}
+
+function submitQuiz() {
+    let score = 0;
+    const results = userAnswers.map((answer, index) => {
+        const question = questions[index];
+        
+        // Handle multiple choice questions
+        if (question.type === "multiple-choice") {
+            const isCorrect = answer === question.correct;
+            return {
+                question: question.question,
+                userAnswer: answer !== null ? question.options[answer] : "No answer",
+                correctAnswer: question.options[question.correct],
+                correct: isCorrect
+            };
+        } 
+        // Handle text input questions
+        else if (question.type === "text-input") {
+            const isCorrect = answer && question.acceptableAnswers.includes(answer);
+            return {
+                question: question.question,
+                userAnswer: answer || "No answer",
+                correctAnswer: question.correct,
+                correct: isCorrect
+            };
+        }
+    });
+
+    const validResults = results.filter(result => result !== undefined);
+    score = validResults.filter(result => result.correct).length;
+    const percentage = Math.round((score / questions.length) * 100);
+
+    quizContainer.innerHTML = `
+        <div class="text-center mb-8 bg-slate-700/50 p-8 rounded-xl">
+            <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
+            <div class="text-6xl font-bold text-blue-500 mb-4">${percentage}%</div>
+            <p class="text-xl mb-4">You got ${score} out of ${questions.length} questions correct</p>
+        </div>
+        <div class="quiz-results space-y-4">
+            ${validResults.map((result, index) => `
+                <div class="result-item ${result.correct ? 'correct' : 'incorrect'}">
+                    <h4 class="font-bold">Question ${index + 1}</h4>
+                    <p class="mb-2">${result.question}</p>
+                    <p>Your answer: ${result.userAnswer}</p>
+                    ${!result.correct ? `<p>Correct answer: ${result.correctAnswer}</p>` : ''}
+                    <div class="mt-2">
+                        ${result.correct ? 
+                            '<i class="fas fa-check-circle text-green-500 mr-2"></i>Correct!' : 
+                            '<i class="fas fa-times-circle text-red-500 mr-2"></i>Incorrect'}
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <div class="text-center mt-8">
+            <a href="https://codeflow.io/courses/python-intro/lesson5" 
+               class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 inline-block">
+                Continue to Next Lesson <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+    `;
+    
+    nextBtn.style.display = 'none';
+}
+
+// Event listeners
+nextBtn.addEventListener('click', () => {
+    if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        updateProgress();
+        updateButtons();
+        displayQuestion();
+    } else {
+        const lastQuestion = questions[currentQuestion];
+        if (lastQuestion.type === "text-input") {
+            const input = document.querySelector('input[type="text"]');
+            if (input && input.value.trim()) {
+                submitQuiz();
+            } else {
+                alert("Please enter your answer before submitting.");
+            }
+        } else if (userAnswers[currentQuestion] !== null) {
+            submitQuiz();
+        } else {
+            alert("Please select an answer before submitting.");
+        }
+    }
+});
+
+// Initialize
+displayQuestion();
+updateProgress();
+updateButtons();
+updateTimer();
+</script>
+
+</body></html>

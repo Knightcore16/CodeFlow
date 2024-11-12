@@ -1,0 +1,309 @@
+{% load static %}
+
+<html><head><base href="https://codeflow.io/leaderboard">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeFlow - Global Leaderboard</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+.gradient-text {
+    background: linear-gradient(45deg, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav-item {
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+    transform: translateY(-2px);
+}
+
+.leaderboard-card {
+    transition: all 0.3s ease;
+}
+
+.leaderboard-card:hover {
+    transform: translateX(5px);
+}
+
+.rank-badge {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.rank-1 {
+    background: linear-gradient(45deg, #ffd700, #ffa500);
+}
+
+.rank-2 {
+    background: linear-gradient(45deg, #C0C0C0, #E8E8E8);
+}
+
+.rank-3 {
+    background: linear-gradient(45deg, #cd7f32, #b87333);
+}
+
+@keyframes slide-up {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+    animation: slide-up 0.5s ease forwards;
+}
+</style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen" x-data="{ 
+    showMenu: false,
+    timeFrame: 'weekly',
+    category: 'overall',
+    leaderboardData: {
+        weekly: [
+            { rank: 1, name: 'Alex Chen', points: 15420, solved: 145, streak: 23, language: 'Python', avatar: 'https://i.pravatar.cc/150?img=1' },
+            { rank: 2, name: 'Sarah Johnson', points: 14850, solved: 132, streak: 19, language: 'JavaScript', avatar: 'https://i.pravatar.cc/150?img=2' },
+            { rank: 3, name: 'Mike Zhang', points: 14200, solved: 128, streak: 21, language: 'Java', avatar: 'https://i.pravatar.cc/150?img=3' },
+            { rank: 4, name: 'Emma Wilson', points: 13750, solved: 125, streak: 15, language: 'Python', avatar: 'https://i.pravatar.cc/150?img=4' },
+            { rank: 5, name: 'David Kim', points: 13200, solved: 118, streak: 17, language: 'C++', avatar: 'https://i.pravatar.cc/150?img=5' },
+            { rank: 6, name: 'Lisa Brown', points: 12800, solved: 115, streak: 14, language: 'JavaScript', avatar: 'https://i.pravatar.cc/150?img=6' },
+            { rank: 7, name: 'Tom Anderson', points: 12400, solved: 110, streak: 12, language: 'Python', avatar: 'https://i.pravatar.cc/150?img=7' },
+            { rank: 8, name: 'Maria Garcia', points: 12000, solved: 108, streak: 16, language: 'Java', avatar: 'https://i.pravatar.cc/150?img=8' },
+            { rank: 9, name: 'James Lee', points: 11600, solved: 105, streak: 11, language: 'JavaScript', avatar: 'https://i.pravatar.cc/150?img=9' },
+            { rank: 10, name: 'Anna Martinez', points: 11200, solved: 102, streak: 13, language: 'Python', avatar: 'https://i.pravatar.cc/150?img=10' }
+        ]
+    }
+}">
+
+<!-- Navigation -->
+<nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <a href="/"><span class="ml-2 text-xl font-bold">CodeFlow</span></a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-6 lg:space-x-8">
+                <a href="{% url 'courses' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-question-circle text-lg"></i>
+                    <span>Courses</span>
+                </a>
+                <a href="{% url 'leaderboard' %}"
+                    class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-trophy text-lg"></i>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="{% url 'resources' %}"
+                    class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-book text-lg"></i>
+                    <span>Resources</span>
+                </a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="nav-item flex content-end items-center space-x-2 hover:text-blue-400"><i class="fas fa-right-from-bracket text-lg"></i>
+                    <span>Logout</span></a>
+                {% else %}
+                <a href="{% url 'login' %}"
+                    class="nav-item flex content-end items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-user text-lg"></i>
+                    <span>Login</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile menu button -->
+            <button @click="showMenu = !showMenu" class="md:hidden text-gray-300 hover:text-white p-2">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="showMenu" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2" class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="{% url 'courses' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-question-circle mr-2"></i>Courses
+                </a>
+                <a href="{% url 'leaderboard' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-trophy mr-2"></i>Leaderboard
+                </a>
+                <a href="{% url 'resources' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-book mr-2"></i>Resources
+                </a>
+                <a href="{% url 'login' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-book mr-2"></i>Login
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-4 gradient-text">Global Leaderboard</h1>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">Compete with developers worldwide and climb the ranks. Show off your coding prowess!</p>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-slate-800 rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 mb-1">Total Participants</p>
+                    <h3 class="text-2xl font-bold">24,891</h3>
+                </div>
+                <i class="fas fa-users text-3xl text-blue-400"></i>
+            </div>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 mb-1">Challenges Completed</p>
+                    <h3 class="text-2xl font-bold">156,742</h3>
+                </div>
+                <i class="fas fa-check-circle text-3xl text-green-400"></i>
+            </div>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 mb-1">Active Countries</p>
+                    <h3 class="text-2xl font-bold">142</h3>
+                </div>
+                <i class="fas fa-globe text-3xl text-purple-400"></i>
+            </div>
+        </div>
+        <div class="bg-slate-800 rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-400 mb-1">Lines of Code</p>
+                    <h3 class="text-2xl font-bold">2.4M</h3>
+                </div>
+                <i class="fas fa-code text-3xl text-yellow-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap gap-4 mb-8">
+        <div class="flex bg-slate-800 rounded-lg p-1">
+            <button @click="timeFrame = 'daily'" 
+                    :class="{'bg-blue-600': timeFrame === 'daily'}"
+                    class="px-4 py-2 rounded-lg transition">Daily</button>
+            <button @click="timeFrame = 'weekly'" 
+                    :class="{'bg-blue-600': timeFrame === 'weekly'}"
+                    class="px-4 py-2 rounded-lg transition">Weekly</button>
+            <button @click="timeFrame = 'monthly'" 
+                    :class="{'bg-blue-600': timeFrame === 'monthly'}"
+                    class="px-4 py-2 rounded-lg transition">Monthly</button>
+        </div>
+        
+        <div class="flex bg-slate-800 rounded-lg p-1">
+            <button @click="category = 'overall'" 
+                    :class="{'bg-blue-600': category === 'overall'}"
+                    class="px-4 py-2 rounded-lg transition">Overall</button>
+            <button @click="category = 'python'" 
+                    :class="{'bg-blue-600': category === 'python'}"
+                    class="px-4 py-2 rounded-lg transition">Python</button>
+            <button @click="category = 'javascript'" 
+                    :class="{'bg-blue-600': category === 'javascript'}"
+                    class="px-4 py-2 rounded-lg transition">JavaScript</button>
+            <button @click="category = 'java'" 
+                    :class="{'bg-blue-600': category === 'java'}"
+                    class="px-4 py-2 rounded-lg transition">Java</button>
+        </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="bg-slate-800 rounded-lg overflow-hidden">
+        <div class="p-6">
+            <template x-for="(user, index) in leaderboardData.weekly" :key="index">
+                <div class="leaderboard-card flex items-center space-x-4 p-4 border-b border-slate-700 hover:bg-slate-700/50 transition"
+                     :style="`animation-delay: ${index * 0.1}s`">
+                    <div :class="{
+                        'rank-badge rank-1': user.rank === 1,
+                        'rank-badge rank-2': user.rank === 2,
+                        'rank-badge rank-3': user.rank === 3,
+                        'bg-slate-700 rank-badge': user.rank > 3
+                    }" x-text="user.rank"></div>
+                    <img :src="user.avatar" :alt="user.name" class="w-12 h-12 rounded-full">
+                    <div class="flex-1">
+                        <h3 class="font-semibold" x-text="user.name"></h3>
+                        <p class="text-sm text-gray-400" x-text="`Preferred: ${user.language}`"></p>
+                    </div>
+                    <div class="text-center px-4">
+                        <p class="font-bold" x-text="user.points"></p>
+                        <p class="text-sm text-gray-400">Points</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <p class="font-bold" x-text="user.solved"></p>
+                        <p class="text-sm text-gray-400">Solved</p>
+                    </div>
+                    <div class="text-center px-4">
+                        <p class="font-bold" x-text="`${user.streak}🔥`"></p>
+                        <p class="text-sm text-gray-400">Streak</p>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Your Position -->
+    <div class="mt-8 bg-blue-600 rounded-lg p-6">
+        <div class="flex items-center space-x-4">
+            <div class="bg-blue-700 rank-badge">256</div>
+            <img src="https://i.pravatar.cc/150?img=11" alt="Your avatar" class="w-12 h-12 rounded-full">
+            <div class="flex-1">
+                <h3 class="font-semibold">Your Position</h3>
+                <p class="text-sm text-blue-200">Keep coding to climb the ranks!</p>
+            </div>
+            <div class="text-center px-4">
+                <p class="font-bold">5,280</p>
+                <p class="text-sm text-blue-200">Points</p>
+            </div>
+            <div class="text-center px-4">
+                <p class="font-bold">48</p>
+                <p class="text-sm text-blue-200">Solved</p>
+            </div>
+            <div class="text-center px-4">
+                <p class="font-bold">7🔥</p>
+                <p class="text-sm text-blue-200">Streak</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="{% static 'assets/js/main.js' %}"></script>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    // Add any additional Alpine.js initialization if needed
+});
+</script>
+
+</body></html>
