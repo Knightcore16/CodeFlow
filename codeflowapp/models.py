@@ -10,7 +10,9 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     icon_class = models.CharField(max_length=100)
-    slug = models.SlugField(unique=True)  
+    slug = models.SlugField(unique=True)
+    category = models.CharField(max_length=100, null=True, blank=True)
+
 
     class Meta:
         ordering = ['-created_at']
@@ -108,4 +110,69 @@ class QuestionResponse(models.Model):
     
     def __str__(self):
         return f"Response to {self.question} by {self.attempt.user.username}"
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    icon_class = models.CharField(max_length=50, help_text="Font Awesome class name")
+    color_class = models.CharField(max_length=50, help_text="Tailwind color class")
+
+    class Meta:
+        verbose_name_plural = "Categories"
+
+    def __str__(self):
+        return self.name
+
+class Resource(models.Model):
+    DIFFICULTY_CHOICES = [
+        ('beginner', 'Beginner'),
+        ('intermediate', 'Intermediate'),
+        ('advanced', 'Advanced'),
+        ('all-levels', 'All Levels'),
+    ]
     
+    TYPE_CHOICES = [
+        ('article', 'Article'),
+        ('video', 'Video Tutorial'),
+        ('practice', 'Practice Problems'),
+        ('guide', 'Guide'),
+        ('tool', 'Tool'),
+    ]
+
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+    description = models.TextField()
+    content = models.TextField(blank=True)  # For articles/guides
+    external_url = models.URLField(blank=True)  # For external resources
+    file = models.FileField(upload_to='resources/', blank=True)  # For downloadable content
+    thumbnail = models.ImageField(upload_to='resource_thumbnails/', blank=True)
+    
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    difficulty = models.CharField(max_length=20, choices=DIFFICULTY_CHOICES)
+    resource_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    
+    views = models.PositiveIntegerField(default=0)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=0.0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    is_featured = models.BooleanField(default=False)
+    is_downloadable = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.title
+
+class ResourceRating(models.Model):
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('resource', 'user')
+
+class ResourceDownload(models.Model):
+    resource = models.ForeignKey(Resource, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    downloaded_at = models.DateTimeField(auto_now_add=True)

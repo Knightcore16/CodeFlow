@@ -8,10 +8,10 @@
     animation: float 6s ease-in-out infinite;
 }
 
-/* main{
-    position: relative;
+main{
+    position: relative !important;
     z-index: 2 !important;
-} */
+}
 
 #particles-js {
     position: fixed;

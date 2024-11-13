@@ -77,6 +77,11 @@
             color: #94a3b8;
         }
 
+        .search-input {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(5px);
+}
+
         .filters {
             display: flex;
             gap: 1rem;
@@ -209,7 +214,23 @@
     </style>
 </head>
 
-<body class="bg-slate-900 text-white min-h-screen" x-data="{ showMenu: false }">
+<body class="bg-slate-900 text-white min-h-screen" x-data="{
+    showMenu: false,
+    searchQuery: '{{ request.GET.search|default:"" }}',
+    selectedCategory: '{{ request.GET.category|default:"all" }}',
+    loadCourses() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('category', this.selectedCategory);
+        
+        fetch(url, { method: 'GET' })
+            .then(response => response.json())
+            .then(data => {
+                this.courses = data.courses;
+            });
+    }
+}">
+<!-- <div id="particles-js"></div> -->
+
     <!-- Navigation -->
     <nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -283,27 +304,46 @@
             </div>
         </div>
     </nav>
+
     <!-- Main Content -->
 
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Header -->
         <div class="text-center mb-12">
             <div class="mb-12">
-                <div class="mb-12">
-                    <div class="flex flex-col gap-6 mb-8">
-                        <input type="search" placeholder="Search learning paths..." class="search-bar">
-                        <div class="filters">
-                            <button class="filter-btn active">All</button>
-                            <button class="filter-btn">Beginner</button>
-                            <button class="filter-btn">Intermediate</button>
-                            <button class="filter-btn">Advanced</button>
-                            <button class="filter-btn">Python</button>
-                            <button class="filter-btn">JavaScript</button>
-                            <button class="filter-btn">Web Dev</button>
-                        </div>
+                <form method="GET" action="{% url 'courses' %}" class="max-w-3xl mx-auto">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            name="search"
+                            x-model="searchQuery"
+                            placeholder="Search courses..."
+                            class="w-full px-6 py-4 rounded-lg search-input text-white border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                        <button type="submit" class="absolute right-6 top-1/2 transform -translate-y-1/2">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </button>
                     </div>
+                </form>
+                <div class="flex flex-wrap justify-center gap-4 mt-8">
+                    <!-- 'All' Category Button -->
+                    <a href="#"
+                        @click.prevent="selectedCategory = 'all'; loadCourses()"
+                        :class="{'bg-blue-600': selectedCategory === 'all'}"
+                        class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
+                        All 
+                    </a>
+                    
+                    <!-- Dynamic Category Buttons -->
+                    {% for category in categories %}
+                    <a href="#"
+                        @click.prevent="selectedCategory = '{{ category.category }}'; loadCourses()"
+                        :class="{'bg-blue-600': selectedCategory === '{{ category.category }}'}"
+                        class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
+                        {{ category.category }}
+                    </a>
+                {% endfor %}
                 </div>
-
             </div>
             <h1 class="text-4xl font-bold mb-4 gradient-text">Learning Paths</h1>
             <p class="text-lg text-gray-300 max-w-2xl mx-auto">Master programming through structured learning paths and
@@ -312,9 +352,10 @@
 
         <!-- Learning Paths Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% if courses %}
             {% for course in courses %}
 
-            <div class="quiz-card">
+            <div class="quiz-card"  x-show="selectedCategory === 'all' || selectedCategory === '{{ course.category }}'">
                 <div
                     class="quiz-image bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center relative">
                     <i class="{{ course.icon_class }} text-6xl text-blue-400"></i>
@@ -337,7 +378,7 @@
                         <!-- <span class="category-badge"></span> -->
                         <div class="quiz-stats">
                             <span><i class="fas fa-clock mr-2"></i>{{ course.duration }}</span>
-                            <span><i class="fas fa-graduation-cap mr-2"></i>{{ course_modules.total_modules }} modules</span>
+                            <span><i class="fas fa-graduation-cap mr-2"></i>{{ course.total_modules }} modules</span>
                         </div>
                     </div>
                     <h3 class="text-xl font-bold mb-2">{{ course.title }}</h3>
@@ -348,7 +389,11 @@
             </div>
 
             {% endfor %}
-
+            {% else %}
+            <div class="col-span-full text-center py-12">
+                <p class="text-gray-400 text-lg">No resources found matching your criteria.</p>
+            </div>
+                    {% endif %}
         </div>
     </main>
 
@@ -361,6 +406,12 @@
         document.addEventListener('alpine:init', () => {
             // Add any additional Alpine.js initialization if needed
         });
+
+        // function updateUrl() {
+        //     const search = encodeURIComponent(this.searchQuery);
+        //     const category = encodeURIComponent(this.selectedCategory);
+        //     window.location.href = `courses?search=${search}&category=${category}`;
+        // }
 
         document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
             document.querySelector('.nav-menu-items').classList.toggle('show');

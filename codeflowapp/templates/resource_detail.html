@@ -1,0 +1,346 @@
+{% load static %}
+
+
+<html><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeFlow - Learning Resources</title>
+
+<link rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+.gradient-text {
+    background: linear-gradient(45deg, #60a5fa, #34d399);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.nav-item {
+    transition: all 0.3s ease;
+}
+
+.nav-item:hover {
+    transform: translateY(-2px);
+}
+
+.resource-card {
+    transition: all 0.3s ease;
+}
+
+.resource-card:hover {
+    transform: translateY(-5px);
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+.search-input {
+    background: rgba(30, 41, 59, 0.5);
+    backdrop-filter: blur(5px);
+}
+</style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen"  x-data="{ showRatingModal: false, showMenu: false }">
+<div id="particles-js"></div>
+
+<!-- Navigation -->
+<nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex items-center">
+                <svg class="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+                <a href="/"><span class="ml-2 text-xl font-bold">CodeFlow</span></a>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-6 lg:space-x-8">
+                <a href="{% url 'courses' %}" class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-question-circle text-lg"></i>
+                    <span>Courses</span>
+                </a>
+                <a href="{% url 'leaderboard' %}"
+                    class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-trophy text-lg"></i>
+                    <span>Leaderboard</span>
+                </a>
+                <a href="{% url 'resources' %}"
+                    class="nav-item flex items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-book text-lg"></i>
+                    <span>Resources</span>
+                </a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'logout' %}" class="nav-item flex content-end items-center space-x-2 hover:text-blue-400"><i class="fas fa-right-from-bracket text-lg"></i>
+                    <span>Logout</span></a>
+                {% else %}
+                <a href="{% url 'login' %}"
+                    class="nav-item flex content-end items-center space-x-2 hover:text-blue-400">
+                    <i class="fas fa-user text-lg"></i>
+                    <span>Login</span>
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile menu button -->
+            <button @click="showMenu = !showMenu" class="md:hidden text-gray-300 hover:text-white p-2">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile menu -->
+        <div x-show="showMenu" x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 transform -translate-y-2"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform -translate-y-2" class="md:hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1">
+                <a href="{% url 'courses' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-question-circle mr-2"></i>Courses
+                </a>
+                <a href="{% url 'leaderboard' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-trophy mr-2"></i>Leaderboard
+                </a>
+                <a href="{% url 'resources' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-book mr-2"></i>Resources
+                </a>
+                <a href="{% url 'login' %}"
+                    class="block px-3 py-2 rounded-md hover:bg-slate-700 transition-colors duration-200">
+                    <i class="fas fa-book mr-2"></i>Login
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumb -->
+    <nav class="mb-8">
+        <ol class="flex items-center space-x-2 text-gray-400">
+            <li><a href="{% url 'resources' %}" class="hover:text-blue-400">Resources</a></li>
+            <li><span class="mx-2">></span></li>
+            <li><a href="?category={{ resource.category.slug }}" class="hover:text-blue-400">{{ resource.category.name }}</a></li>
+            <li><span class="mx-2">></span></li>
+            <li class="text-white">{{ resource.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- Resource Header -->
+    <div class="bg-slate-800 rounded-lg p-8 mb-8">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center space-x-4">
+                <div class="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center">
+                    <i class="{{ resource.category.icon_class }} {{ resource.category.color_class }} text-3xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">{{ resource.title }}</h1>
+                    <div class="flex items-center space-x-4 text-gray-400">
+                        <span class="flex items-center">
+                            <i class="fas fa-eye mr-2"></i>
+                            {{ resource.views }} views
+                        </span>
+                        <span class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-2"></i>
+                            {{ resource.rating|floatformat:1 }}
+                        </span>
+                        <span class="px-3 py-1 rounded-full text-sm
+                            {% if resource.difficulty == 'beginner' %}bg-green-600 text-white
+                            {% elif resource.difficulty == 'intermediate' %}bg-yellow-600 text-white
+                            {% elif resource.difficulty == 'advanced' %}bg-red-600 text-white
+                            {% else %}bg-blue-600{% endif %}">
+                            {{ resource.difficulty|title }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% if resource.is_downloadable and user.is_authenticated %}
+            <button 
+                onclick="downloadResource('{{ resource.slug }}')"
+                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center space-x-2">
+                <i class="fas fa-download"></i>
+                <span>Download</span>
+            </button>
+            {% endif %}
+        </div>
+        <p class="text-gray-300 text-lg mb-6">{{ resource.description }}</p>
+    </div>
+
+    <!-- Resource Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+            <div class="bg-slate-800 rounded-lg p-8 mb-8">
+                {% if resource.content %}
+                    <div class="prose prose-invert max-w-none">
+                        {{ resource.content|safe }}
+                    </div>
+                {% endif %}
+                
+                {% if resource.external_url %}
+                    <div class="mt-8">
+                        <a href="{{ resource.external_url }}" 
+                           target="_blank"
+                           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg inline-flex items-center space-x-2">
+                            <span>Access Resource</span>
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Rating Section -->
+            {% if user.is_authenticated %}
+            <div class="bg-slate-800 rounded-lg p-8">
+                <h3 class="text-xl font-bold mb-4">Rate this Resource</h3>
+                <div class="flex items-center space-x-4 mb-4">
+                    {% for i in "12345" %}
+                    <button 
+                        data-index="{{ forloop.counter }}" 
+                        onclick="rateResource({{ forloop.counter }})"
+                        class="text-2xl {% if user_rating and user_rating.rating >= forloop.counter %}text-yellow-400{% else %}text-gray-400{% endif %} hover:text-yellow-400">
+                        <i class="fas fa-star"></i>
+                    </button>
+                    {% endfor %}
+                </div>
+                <textarea 
+                    id="ratingComment"
+                    class="w-full p-4 bg-slate-700 rounded-lg text-white placeholder-gray-400 mb-4"
+                    placeholder="Share your thoughts about this resource..."
+                >{{ user_rating.comment|default:"" }}</textarea>
+                <button 
+                    onclick="submitRating()"
+                    class="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg">
+                    Submit Rating
+                </button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Related Resources -->
+            <div class="bg-slate-800 rounded-lg p-6">
+                <h3 class="text-xl font-bold mb-4">Related Resources</h3>
+                <div class="space-y-4">
+                    {% for related in related_resources %}
+                    <a href="{% url 'resource_detail' related.slug %}" 
+                       class="block p-4 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
+                        <h4 class="font-semibold mb-2">{{ related.title }}</h4>
+                        <p class="text-gray-400 text-sm">{{ related.description|truncatewords:20 }}</p>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="{% static 'assets/js/main.js' %}"></script>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+    // Add any additional Alpine.js initialization if needed
+});
+
+let currentRating = {{ user_rating.rating|default:0 }};
+
+function rateResource(rating) {
+    currentRating = rating;
+
+    // Update all stars based on the rating
+    const stars = document.querySelectorAll('button[data-index]');
+    stars.forEach(star => {
+        const starIndex = parseInt(star.getAttribute('data-index'));
+        // Apply the yellow class to stars up to the selected rating
+        if (starIndex <= currentRating) {
+            star.classList.add('text-yellow-400');
+            star.classList.remove('text-gray-400');
+        } else {
+            star.classList.add('text-gray-400');
+            star.classList.remove('text-yellow-400');
+        }
+    });
+}
+
+// Initialize the stars based on the current rating
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('button[data-index]');
+    stars.forEach(star => {
+        const starIndex = parseInt(star.getAttribute('data-index'));
+        if (starIndex <= currentRating) {
+            star.classList.add('text-yellow-400');
+            star.classList.remove('text-gray-400');
+        } else {
+            star.classList.add('text-gray-400');
+            star.classList.remove('text-yellow-400');
+        }
+    });
+});
+
+    function submitRating() {
+        const comment = document.getElementById('ratingComment').value;
+        
+        fetch('{% url "rate_resource" resource.slug %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({
+                rating: currentRating,
+                comment: comment
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to submit rating. Please try again.');
+        });
+    }
+    
+    function downloadResource(slug) {
+        fetch(`/resources/${slug}/download/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.download_url) {
+                window.location.href = data.download_url;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to download resource. Please try again.');
+        });
+    }
+    </script>
+
+</body></html>

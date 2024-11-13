@@ -1,11 +1,12 @@
 {% load static %}
 
 
-<html><head><base href="https://codeflow.io/resources">
+<html><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CodeFlow - Learning Resources</title>
 
+<link rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
 <script src="https://cdn.tailwindcss.com"></script>
 <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -52,89 +53,11 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen" x-data="{ 
     showMenu: false,
-    selectedCategory: 'all',
-    searchQuery: '',
-    resources: [
-        {
-            title: 'Python Fundamentals',
-            description: 'Master the basics of Python programming with comprehensive tutorials and examples.',
-            category: 'python',
-            difficulty: 'beginner',
-            type: 'course',
-            icon: 'fab fa-python',
-            color: 'text-yellow-400',
-            views: '12.5k',
-            rating: 4.8
-        },
-        {
-            title: 'Advanced JavaScript Patterns',
-            description: 'Deep dive into JavaScript design patterns, async programming, and modern ES6+ features.',
-            category: 'javascript',
-            difficulty: 'advanced',
-            type: 'tutorial',
-            icon: 'fab fa-js',
-            color: 'text-yellow-300',
-            views: '8.3k',
-            rating: 4.9
-        },
-        {
-            title: 'Data Structures & Algorithms',
-            description: 'Comprehensive guide to implementing common data structures and algorithms with practical examples.',
-            category: 'algorithms',
-            difficulty: 'intermediate',
-            type: 'guide',
-            icon: 'fas fa-project-diagram',
-            color: 'text-blue-400',
-            views: '15.2k',
-            rating: 4.7
-        },
-        {
-            title: 'Web Development Roadmap',
-            description: 'Complete guide to becoming a full-stack web developer in 2023.',
-            category: 'web',
-            difficulty: 'all-levels',
-            type: 'roadmap',
-            icon: 'fas fa-road',
-            color: 'text-green-400',
-            views: '20.1k',
-            rating: 4.9
-        },
-        {
-            title: 'Git & GitHub Mastery',
-            description: 'Learn version control and collaborative development with Git and GitHub.',
-            category: 'tools',
-            difficulty: 'beginner',
-            type: 'course',
-            icon: 'fab fa-github',
-            color: 'text-gray-400',
-            views: '9.8k',
-            rating: 4.6
-        },
-        {
-            title: 'React.js Best Practices',
-            description: 'Essential patterns and practices for building scalable React applications.',
-            category: 'javascript',
-            difficulty: 'intermediate',
-            type: 'guide',
-            icon: 'fab fa-react',
-            color: 'text-blue-400',
-            views: '11.3k',
-            rating: 4.8
-        }
-    ],
-    get filteredResources() {
-        return this.resources.filter(resource => {
-            const matchesSearch = this.searchQuery === '' || 
-                resource.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                resource.description.toLowerCase().includes(this.searchQuery.toLowerCase());
-            
-            const matchesCategory = this.selectedCategory === 'all' || 
-                resource.category === this.selectedCategory;
-            
-            return matchesSearch && matchesCategory;
-        });
-    }
+    selectedCategory: '{{ request.GET.category|default:"all" }}',
+    searchQuery: '{{ request.GET.search|default:"" }}'
 }">
+<div id="particles-js"></div>
+
 
 <!-- Navigation -->
 <nav class="bg-slate-800/90 backdrop-blur-sm sticky top-0 shadow-lg z-50">
@@ -216,110 +139,98 @@
     <!-- Header Section -->
     <div class="text-center mb-12">
         <h1 class="text-4xl font-bold mb-4 gradient-text">Learning Resources</h1>
-        <p class="text-lg text-gray-300 max-w-2xl mx-auto">Curated collection of high-quality programming resources to help you master coding skills.</p>
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto">
+            Curated collection of robotics and programming resources for our club members.
+        </p>
     </div>
 
     <!-- Search & Filter Section -->
     <div class="mb-12">
-        <div class="max-w-3xl mx-auto">
+        <form method="GET" action="{% url 'resources' %}" class="max-w-3xl mx-auto">
             <div class="relative">
                 <input 
                     type="text" 
+                    name="search"
                     x-model="searchQuery"
                     placeholder="Search resources..."
                     class="w-full px-6 py-4 rounded-lg search-input text-white border border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
-                <i class="fas fa-search absolute right-6 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <button type="submit" class="absolute right-6 top-1/2 transform -translate-y-1/2">
+                    <i class="fas fa-search text-gray-400"></i>
+                </button>
             </div>
-        </div>
+        </form>
 
         <!-- Category Filters -->
         <div class="flex flex-wrap justify-center gap-4 mt-8">
-            <button 
-                @click="selectedCategory = 'all'"
+            <a href="?category=all" 
+                @click.prevent="selectedCategory = 'all'"
                 :class="{'bg-blue-600': selectedCategory === 'all'}"
                 class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
                 All Resources
-            </button>
-            <button 
-                @click="selectedCategory = 'python'"
-                :class="{'bg-blue-600': selectedCategory === 'python'}"
+            </a>
+            {% for category in categories %}
+            <a href="?category={{ category.slug }}"
+                @click.prevent="selectedCategory = '{{ category.slug }}'"
+                :class="{'bg-blue-600': selectedCategory === '{{ category.slug }}'}"
                 class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
-                <i class="fab fa-python mr-2"></i>Python
-            </button>
-            <button 
-                @click="selectedCategory = 'javascript'"
-                :class="{'bg-blue-600': selectedCategory === 'javascript'}"
-                class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
-                <i class="fab fa-js mr-2"></i>JavaScript
-            </button>
-            <button 
-                @click="selectedCategory = 'algorithms'"
-                :class="{'bg-blue-600': selectedCategory === 'algorithms'}"
-                class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
-                <i class="fas fa-project-diagram mr-2"></i>Algorithms
-            </button>
-            <button 
-                @click="selectedCategory = 'tools'"
-                :class="{'bg-blue-600': selectedCategory === 'tools'}"
-                class="px-6 py-2 rounded-full bg-slate-800 hover:bg-slate-700 transition">
-                <i class="fas fa-tools mr-2"></i>Tools
-            </button>
+                <i class="{{ category.icon_class }} mr-2"></i>{{ category.name }}
+            </a>
+            {% endfor %}
         </div>
     </div>
 
     <!-- Resources Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <template x-for="resource in filteredResources" :key="resource.title">
-            <div class="resource-card bg-slate-800 rounded-lg overflow-hidden shadow-lg">
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center">
-                            <i :class="[resource.icon, resource.color, 'text-2xl floating-icon']"></i>
-                        </div>
-                        <span :class="{'bg-green-600': resource.difficulty === 'beginner',
-                                     'bg-yellow-600': resource.difficulty === 'intermediate',
-                                     'bg-red-600': resource.difficulty === 'advanced',
-                                     'bg-blue-600': resource.difficulty === 'all-levels'}"
-                              class="px-3 py-1 rounded-full text-sm">
-                            <span x-text="resource.difficulty" class="capitalize"></span>
-                        </span>
+        {% for resource in resources %}
+        <div class="resource-card bg-slate-800 rounded-lg overflow-hidden shadow-lg" x-show="selectedCategory === 'all' || selectedCategory === '{{ resource.category.slug }}'">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center">
+                        <i class="{{ resource.category.icon_class }} {{ resource.category.color_class }} text-2xl floating-icon"></i>
                     </div>
-                    
-                    <h3 class="text-xl font-bold mb-2" x-text="resource.title"></h3>
-                    <p class="text-gray-400 mb-4" x-text="resource.description"></p>
-                    
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-eye text-gray-400"></i>
-                            <span class="text-gray-400" x-text="resource.views"></span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <i class="fas fa-star text-yellow-400"></i>
-                            <span x-text="resource.rating"></span>
-                        </div>
-                    </div>
+                    <span class="px-3 py-1 rounded-full text-sm
+                        {% if resource.difficulty == 'beginner' %}bg-green-600
+                        {% elif resource.difficulty == 'intermediate' %}bg-yellow-600
+                        {% elif resource.difficulty == 'advanced' %}bg-red-600
+                        {% else %}bg-blue-600{% endif %}">
+                        {{ resource.difficulty|title }}
+                    </span>
                 </div>
-                <div class="bg-slate-700 px-6 py-4">
-                    <a href="#" class="text-blue-400 hover:text-blue-300 flex items-center justify-between">
-                        <span>Access Resource</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </a>
+                
+                <h3 class="text-xl font-bold mb-2">{{ resource.title }}</h3>
+                <p class="text-gray-400 mb-4">{{ resource.description }}</p>
+                
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-eye text-gray-400"></i>
+                        <span class="text-gray-400">{{ resource.views }}</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <span>{{ resource.rating }}</span>
+                    </div>
                 </div>
             </div>
-        </template>
-    </div>
-
-    <!-- Newsletter Section -->
-    <div class="mt-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-8 text-center">
-        <h3 class="text-2xl font-bold mb-4">Stay Updated with Latest Resources</h3>
-        <p class="text-blue-100 mb-6">Get weekly curated resources and coding tips directly in your inbox.</p>
-        <div class="max-w-md mx-auto flex gap-4">
-            <input type="email" placeholder="Enter your email" class="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 focus:outline-none focus:border-white placeholder-blue-200">
-            <button class="px-6 py-2 bg-white text-blue-600 rounded-lg font-semibold hover:bg-blue-50 transition">
-                Subscribe
-            </button>
+            <div class="bg-slate-700 px-6 py-4 flex justify-between items-center">
+                <a href="{% url 'resource_detail' resource.slug %}" 
+                   class="text-blue-400 hover:text-blue-300">
+                    Access This Resource
+                </a>
+                <i class="fas fa-arrow-right"></i>
+                {% if resource.is_downloadable and user.is_authenticated %}
+                <button onclick="downloadResource('{{ resource.slug }}')"
+                        class="text-green-400 hover:text-green-300">
+                    <i class="fas fa-download"></i>
+                </button>
+                {% endif %}
+            </div>
         </div>
+        {% empty %}
+        <div class="col-span-full text-center py-12">
+            <p class="text-gray-400 text-lg">No resources found matching your criteria.</p>
+        </div>
+        {% endfor %}
     </div>
 </main>
 
@@ -332,6 +243,25 @@
 document.addEventListener('alpine:init', () => {
     // Add any additional Alpine.js initialization if needed
 });
+
+function downloadResource(slug) {
+    fetch(`/resources/${slug}/download/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.download_url) {
+            window.location.href = data.download_url;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to download resource. Please try again.');
+    });
+}
 </script>
 
 </body></html>
